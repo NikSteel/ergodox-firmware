@@ -1,17 +1,11 @@
 # -----------------------------------------------------------------------------
-# makefile for the ergoDOX project
+# makefile for the ergoDOX firmware
 #
-# This should produce a single file (probably in an archive format) for
-# distribution, containing everything people will need to use the software.
+# - .h file dependencies are automatically generated
 #
-# DEPENDENCIES:  This is unabashedly dependant on (the GNU implementation of)
-# various Unix commands, and therefore probably won't work in a Windows
-# environment (besides maybe cygwin).  Sorry...  I don't know a good portable
-# way to write it.
-#
-# TODO:
-# - include doc files (and maybe render them in html)
-# - include the UI stuff (once it's done)
+# - This makefile was originally (extensively) modified from the WinAVR
+#   makefile template, mostly by removing stuff.  The copy I used was from
+#   [pjrc : usb_keyboard] (http://pjrc.com/teensy/usb_keyboard.zip).
 # -----------------------------------------------------------------------------
 # Copyright (c) 2012 Ben Blazak <benblazak.dev@gmail.com>
 # Released under The MIT License (MIT) (see "license.md")
@@ -19,100 +13,149 @@
 # -----------------------------------------------------------------------------
 
 
-include src/makefile-options
+include makefile-options
 
-# which layouts to compile (will override the variable in src/makefile-options)
-# --- default
-LAYOUT := qwerty-kinesis-mod
-# --- all
-LAYOUTS := qwerty-kinesis-mod dvorak-kinesis-mod colemak-symbol-mod
+FORMAT := ihex        # the program binary's format
+MCU    := atmega32u4  # processor type (for teensy 2.0); must match real life
+BOARD  := teensy-2-0  # see the libraries you're using for what's available
+F_CPU  := 16000000    # processor speed, in Hz
 
-# system specific stuff
-UNAME := $(shell uname)
-ifeq ($(UNAME),Darwin)
-	DATE_PROG := gdate
-else
-	DATE_PROG := date
-endif
+# firmware stuff
+SRC  := $(wildcard *.c)
+# keyboard and layout stuff
+# --- remove whitespace from vars
+KEYBOARD := $(strip $(KEYBOARD))
+LAYOUT   := $(strip $(LAYOUT))
+# --- include stuff
+SRC += $(wildcard keyboard/$(KEYBOARD)*.c)
+SRC += $(wildcard keyboard/$(KEYBOARD)/*.c)
+SRC += $(wildcard keyboard/$(KEYBOARD)/controller/*.c)
+SRC += $(wildcard keyboard/$(KEYBOARD)/layout/$(LAYOUT)*.c)
+# library stuff
+# - should be last in the list of files to compile, in case there are default
+#   macros that have to be overridden in other source files
+# - add more "*/*/..."s as necessary to compile everything.
+# - parts of the stuff under "lib" may not be necessary, depending on other
+#   options, but it's all included here.  hopefully any unnecessary stuff gets
+#   compiled out.  else, the makefile will have to become more complicated.
+SRC += $(wildcard lib/*.c)
+SRC += $(wildcard lib/*/*.c)
+SRC += $(wildcard lib/*/*/*.c)
+SRC += $(wildcard lib-other/*.c)
+SRC += $(wildcard lib-other/*/*.c)
+SRC += $(wildcard lib-other/*/*/*.c)
 
-CURRENT_DATE := $(shell $(DATE_PROG) --rfc-3339 s)
+OBJ = $(SRC:%.c=%.o)
 
-# git info
-GIT_BRANCH := $(shell git branch -l | grep '*' | cut -c 3-)
-GIT_COMMIT_DATE := $(shell git log -n 1 --pretty --date=iso | grep 'Date' | cut -c 9- )
-GIT_COMMIT_ID := $(shell git log -n 1 | grep 'commit' | cut -c 8-)
 
-# name to use for the final distribution file or package
-TARGET := ergodox-firmware--$(GIT_BRANCH)--$(shell $(DATE_PROG) -d "$(GIT_COMMIT_DATE)" +'%Y%m%dT%H%M%S')--$(shell echo $(GIT_COMMIT_ID) | cut -c 1-7)--$(LAYOUT)
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+CFLAGS := -mmcu=$(MCU)      # processor type (teensy 2.0); must match real
+			    #   life
+CFLAGS += -DF_CPU=$(F_CPU)  # processor frequency; must match initialization
+			    #   in source
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+CFLAGS += -DMAKEFILE_BOARD='$(strip $(BOARD))'
+CFLAGS += -DMAKEFILE_KEYBOARD='$(strip $(KEYBOARD))'
+CFLAGS += -DMAKEFILE_KEYBOARD_LAYOUT='$(strip $(LAYOUT))'
+CFLAGS += -DMAKEFILE_DEBOUNCE_TIME='$(strip $(DEBOUNCE_TIME))'
+CFLAGS += -DMAKEFILE_LED_BRIGHTNESS='$(strip $(LED_BRIGHTNESS))'
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+CFLAGS += -std=gnu99  # use C99 plus GCC extensions
+CFLAGS += -Os         # optimize for size
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+CFLAGS += -Wall                # enable lots of common warnings
+CFLAGS += -Wstrict-prototypes  # "warn if a function is declared or defined
+			       #   without specifying the argument types"
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+CFLAGS += -fpack-struct  # "pack all structure members together without holes"
+CFLAGS += -fshort-enums  # "allocate to an 'enum' type only as many bytes as it
+			 #   needs for the declared range of possible values"
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+CFLAGS += -ffunction-sections  # \ "place each function or data into its own
+CFLAGS += -fdata-sections      # /   section in the output file if the
+			       #     target supports arbitrary sections."  for
+			       #     linker optimizations, and discarding
+			       #     unused code.
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+LDFLAGS := -Wl,-Map=$(strip $(TARGET)).map,--cref  # generate a link map, with
+						   #   a cross reference table
+LDFLAGS += -Wl,--relax        # for some linker optimizations
+LDFLAGS += -Wl,--gc-sections  # discard unused functions and data
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+GENDEPFLAGS += -MMD -MP -MF $@.dep  # generate dependency files
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-# directories
-BUILD := build
-ROOT := $(BUILD)/$(TARGET)
-SCRIPTS := build-scripts
+
+CC      := avr-gcc
+OBJCOPY := avr-objcopy
+SIZE    := avr-size
+
+
+# remove whitespace from some of the options
+FORMAT := $(strip $(FORMAT))
+
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
-.PHONY: all clean checkin build-dir firmware dist zip zip-all
+.PHONY: all clean
 
-all: dist
+all: $(TARGET).hex $(TARGET).eep
+	@echo
+	@echo '---------------------------------------------------------------'
+	@echo '------- done --------------------------------------------------'
+	@echo
+	$(SIZE) --target=$(FORMAT) $(TARGET).hex
+	@echo
+	$(SIZE) --target=$(FORMAT) $(TARGET).eep
+	@echo
+	@echo 'you can load "$(TARGET).hex" and "$(TARGET).eep" onto the'
+	@echo 'Teensy using the Teensy loader'
+	@echo
+	@echo '---------------------------------------------------------------'
+	@echo
 
 clean:
-	git clean -dX  # remove ignored files and directories
-	-rm -r '$(BUILD)'
+	@echo
+	@echo --- cleaning ---
+	git clean -dXf  # remove ignored files and directories
 
-checkin:
-	-git commit -a
+# -----------------------------------------------------------------------------
 
-build-dir:
-	-rm -r '$(BUILD)/$(TARGET)'*
-	-mkdir -p '$(BUILD)/$(TARGET)'
+.SECONDARY:
 
-firmware:
-	cd src; $(MAKE) LAYOUT=$(LAYOUT) all
+%.hex: %.elf
+	@echo
+	@echo --- making $@ ---
+	# from the WinAVR makefile template (modified)
+	$(OBJCOPY) -O $(FORMAT) \
+		-R .eeprom -R .fuse -R .lock -R .signature \
+		$< $@
 
-$(ROOT)/firmware.%: firmware
-	cp 'src/firmware.$*' '$@'
+%.eep: %.elf
+	@echo
+	@echo --- making $@ ---
+	# from the WinAVR makefile template (modified)
+	-$(OBJCOPY) -O $(FORMAT) \
+		-j .eeprom \
+		--set-section-flags=.eeprom="alloc,load" \
+		--change-section-lma .eeprom=0 \
+		--no-change-warnings \
+		$< $@ || exit 0
 
+%.elf: $(OBJ)
+	@echo
+	@echo --- making $@ ---
+	$(CC) $(strip $(CFLAGS)) $(strip $(LDFLAGS)) $^ --output $@
 
-$(ROOT)/firmware--ui-info.json: $(SCRIPTS)/gen-ui-info.py checkin
-	( ./'$<' \
-		--current-date '$(shell $(DATE_PROG) --rfc-3339 s)' \
-		--git-commit-date '$(GIT_COMMIT_DATE)' \
-		--git-commit-id '$(GIT_COMMIT_ID)' \
-		--map-file-path '$(BUILD)/$(TARGET)/firmware.map' \
-		--source-code-path 'src' \
-		--matrix-file-path 'src/keyboard/$(KEYBOARD)/matrix.h' \
-		--layout-file-path \
-			'src/keyboard/$(KEYBOARD)/layout/$(LAYOUT).c' \
-	) > '$@'
+%.o: %.c
+	@echo
+	@echo --- making $@ ---
+	$(CC) -c $(strip $(CFLAGS)) $(strip $(GENDEPFLAGS)) $< -o $@ 
 
-$(ROOT)/firmware--layout.html: \
-	$(SCRIPTS)/gen-layout.py \
-	$(ROOT)/firmware--ui-info.json
-	\
-	( ./'$<' \
-		--ui-info-file '$(ROOT)/firmware--ui-info.json' \
-	) > '$@'
+# -----------------------------------------------------------------------------
 
-
-dist: \
-	checkin \
-	build-dir \
-	$(ROOT)/firmware.hex \
-	$(ROOT)/firmware.eep \
-	$(ROOT)/firmware.map \
-	$(ROOT)/firmware--ui-info.json \
-	$(ROOT)/firmware--layout.html
-
-zip: dist
-	( cd '$(BUILD)/$(TARGET)'; \
-	  zip '../$(TARGET).zip' \
-	      -r * .* \
-	      -x '..*' )
-
-zip-all:
-	for layout in $(LAYOUTS); do \
-		make LAYOUT=$$layout zip; \
-	done
+-include $(OBJ:%=%.dep)
 
