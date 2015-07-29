@@ -31,6 +31,12 @@ changed since this document was last properly updated:
   (https://github.com/dyuri/ergodox-firmware) of rev-2.  Not merged, but I plan
   to implement the features later, if I can.  See [Pull Request #28]
   (https://github.com/benblazak/ergodox-firmware/pull/28).
+* Oleg Kostyuk (cub-uanic) [ported the TMK firmware]
+  (https://github.com/cub-uanic/tmk_keyboard)
+  (written by "hasu") to the ErgoDox!
+* Jacob McIntosh ([nacitar](https://github.com/nacitar)) implemented 4 more
+  media keys (stop, mute, vol_up, and vol_down) in rev-1, fixed a media key
+  bug, and implemented workman-p.
 
 
 
