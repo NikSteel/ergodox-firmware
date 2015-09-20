@@ -66,17 +66,17 @@ KB_MATRIX_LAYER(
 	// unused
 	0,	
 	// left hand
-	KEY_Escape,	KEY_1_Exclamation,	KEY_2_At,	KEY_3_Pound,	KEY_4_Dollar,	KEY_5_Percent,	0x36,	
-	0x26,	KEY_q_Q,	KEY_w_W,	KEY_e_E,	KEY_r_R,	KEY_t_T,	0x2F,	
+	KEY_Escape,	KEY_1_Exclamation,	KEY_2_At,	KEY_3_Pound,	KEY_4_Dollar,	KEY_5_Percent,	/*shift*/ KEY_Comma_LessThan,	
+	/*shift*/KEY_9_LeftParenthesis,	KEY_q_Q,	KEY_w_W,	KEY_e_E,	KEY_r_R,	KEY_t_T,	/*shift*/KEY_LeftBracket_LeftBrace,	
 	KEY_Tab,	KEY_a_A,	KEY_s_S,	KEY_d_D,	KEY_f_F,	KEY_g_G,	
 	KEY_LeftShift,	KEY_z_Z,	KEY_x_X,	KEY_c_C,	KEY_v_V,	KEY_b_B,	KEY_LeftBracket_LeftBrace,	
-	KEY_Backslash_Pipe,	0x35,	0x31,	KEY_Equal_Plus,	0x2D,	
+	KEY_Backslash_Pipe,	/*shift*/KEY_GraveAccent_Tilde,	/*shift*/KEY_Backslash_Pipe,	KEY_Equal_Plus,	/*shift*/KEY_Dash_Underscore,	
 	KEY_DeleteForward,	KEY_LeftGUI,	
 	0,	0,	KEY_LeftAlt,	
 	KEY_DeleteBackspace,	1,	KEY_LeftControl,	
 	// right hand
-	0x37,	KEY_6_Caret,	KEY_7_Ampersand,	KEY_8_Asterisk,	KEY_9_LeftParenthesis,	KEY_0_RightParenthesis,	KEY_Dash_Underscore,	
-	0x30,	KEY_y_Y,	KEY_u_U,	KEY_i_I,	KEY_o_O,	KEY_p_P,	0x27,	
+	/*shift*/KEY_Period_GreaterThan,	KEY_6_Caret,	KEY_7_Ampersand,	KEY_8_Asterisk,	KEY_9_LeftParenthesis,	KEY_0_RightParenthesis,	KEY_Dash_Underscore,	
+	/*shift*/KEY_RightBracket_RightBrace,	KEY_y_Y,	KEY_u_U,	KEY_i_I,	KEY_o_O,	KEY_p_P,	/*shift*/KEY_0_RightParenthesis,	
 	KEY_h_H,	KEY_j_J,	KEY_k_K,	KEY_l_L,	KEY_Semicolon_Colon,	KEY_SingleQuote_DoubleQuote,	
 	KEY_RightBracket_RightBrace,	KEY_n_N,	KEY_m_M,	KEY_Comma_LessThan,	KEY_Period_GreaterThan,	KEY_Slash_Question,	KEY_RightShift,	
 	KEY_LeftArrow,	KEY_UpArrow,	KEY_DownArrow,	KEY_RightArrow,	KEY_Application,	
@@ -91,7 +91,7 @@ KB_MATRIX_LAYER(
 	// left hand
 	1,	KEY_F1,	KEY_F2,	KEY_F3,	KEY_F4,	KEY_F5,	0,	
 	KEY_VolumeUp,	0,	0,	0,	0,	0,	0,	
-	KEY_Mute,	0x2F,	0x30,	0x26,	0x27,	0,	
+	KEY_Mute,	/*shift*/KEY_LeftBracket_LeftBrace,	/*shift*/KEY_RightBracket_RightBrace,	/*shift*/KEY_9_LeftParenthesis,	/*shift*/KEY_0_RightParenthesis,	0,	
 	KEY_VolumeDown,	0,	0,	0,	0,	0,	0,	
 	0,	0,	0,	0,	0,	
 	KEY_LeftShift,	0,	
@@ -99,9 +99,9 @@ KB_MATRIX_LAYER(
 	0,	0,	0,	
 	// right hand
 	0,	KEY_F6,	KEY_F7,	KEY_F8,	KEY_F9,	KEY_F10,	KEY_PrintScreen,	
-	0,	0x36,	0x31,	0x24,	KEY_F11,	KEY_F12,	0,	
-	KEY_Equal_Plus,	KEYPAD_Plus,	KEYPAD_Minus,	KEYPAD_Asterisk,	KEYPAD_Slash,	0x22,	
-	0,	0x37,	0x23,	0x1E,	0x38,	0x33,	0x20,	
+	0,	/*shift*/KEY_Comma_LessThan,	/*shift*/KEY_Backslash_Pipe,	/*shift*/KEY_7_Ampersand,	KEY_F11,	KEY_F12,	KEY_GraveAccent_Tilde,	
+	KEY_Equal_Plus,	KEYPAD_Plus,	KEYPAD_Minus,	KEYPAD_Asterisk,	KEYPAD_Slash,	/*shift*/KEY_5_Percent,	
+	0,	/*shift*/KEY_Period_GreaterThan,	/*shift*/KEY_6_Caret,	/*shift*/KEY_4_Dollar,	/*shift*/KEY_2_At, /*shift*/KEY_1_Exclamation, /*shift*/KEY_3_Pound,	
 	KEY_Insert,	KEY_PageUp,	KEY_PageDown,	KEY_Home,	KEY_End,	
 	0,	0,	
 	0,	0,	0,	
@@ -334,7 +334,7 @@ KB_MATRIX_LAYER(
 	ktrans,	NULL,	ktrans,	
 	// right hand
 	NULL,	kprrel,	kprrel,	kprrel,	kprrel,	kprrel,	kprrel,	
-	NULL,	sshprre,	sshprre,	sshprre,	kprrel,	kprrel,	NULL,	
+	NULL,	sshprre,	sshprre,	sshprre,	kprrel,	kprrel,	kprrel,	
 	kprrel,	kprrel,	kprrel,	kprrel,	kprrel,	sshprre,	
 	NULL,	sshprre,	sshprre,	sshprre,	sshprre,	sshprre,	sshprre,	
 	kprrel,	kprrel,	kprrel,	kprrel,	kprrel,	
@@ -569,7 +569,7 @@ KB_MATRIX_LAYER(
 	ktrans,	NULL,	ktrans,	
 	// right hand
 	NULL,	kprrel,	kprrel,	kprrel,	kprrel,	kprrel,	kprrel,	
-	NULL,	sshprre,	sshprre,	sshprre,	kprrel,	kprrel,	NULL,	
+	NULL,	sshprre,	sshprre,	sshprre,	kprrel,	kprrel,	kprrel,	
 	kprrel,	kprrel,	kprrel,	kprrel,	kprrel,	sshprre,	
 	NULL,	sshprre,	sshprre,	sshprre,	sshprre,	sshprre,	sshprre,	
 	kprrel,	kprrel,	kprrel,	kprrel,	kprrel,	
